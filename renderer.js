@@ -1,9 +1,13 @@
 async function loadItems() {
-    const items = await window.electron.invoke('get-items');
-    console.log('Loaded items:', items);  // Debug log
-    items.forEach(item => {
-        addItemToTable(item);
-    });
+    try {
+        const items = await window.electron.invoke('get-items');
+        console.log('Loaded items:', items);  // Debug log
+        items.forEach(item => {
+            addItemToTable(item);
+        });
+    } catch (error) {
+        console.error('Error loading items:', error);
+    }
 }
 
 function addItemToTable(item) {
@@ -27,16 +31,31 @@ function addItemToTable(item) {
 
 function addItem() {
     console.log('Add item function called');  // Debug log
+    const titleInput = document.getElementById('title-input');
+    const authorInput = document.getElementById('author-input');
+    const typeInput = document.getElementById('type-input');
+    const yearInput = document.getElementById('year-input');
+    const publicationInput = document.getElementById('publication-input');
+    const citationKeyInput = document.getElementById('citationkey-input');
+
     const item = {
-        title: document.getElementById('title-input').value,
-        author: document.getElementById('author-input').value,
-        type: document.getElementById('type-input').value,
-        year: document.getElementById('year-input').value,
-        publication: document.getElementById('publication-input').value,
-        citationkey: document.getElementById('citationkey-input').value
+        title: titleInput.value,
+        author: authorInput.value,
+        type: typeInput.value,
+        year: yearInput.value,
+        publication: publicationInput.value,
+        citationkey: citationKeyInput.value
     };
     console.log('New item:', item);  // Debug log
     addItemToTable(item);
+
+    // Clear input fields
+    titleInput.value = "";
+    authorInput.value = "";
+    typeInput.value = "";
+    yearInput.value = "";
+    publicationInput.value = "";
+    citationKeyInput.value = "";
 }
 
 async function saveItems() {
@@ -47,7 +66,8 @@ async function saveItems() {
 }
 
 function exitApp() {
-    window.close();
+    saveItems();
+    window.electron.send('app-quit');
 }
 
 function getTableItems() {
@@ -68,14 +88,23 @@ function getTableItems() {
     return items;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const addButton = document.getElementById('add-item-btn');
-    const saveButton = document.getElementById('save-btn');
-    const exitButton = document.getElementById('exit-btn');
+document.getElementById("add-item-btn").addEventListener("click", addItem);
 
-    addButton.addEventListener('click', addItem);
-    saveButton.addEventListener('click', saveItems);
-    exitButton.addEventListener('click', exitApp);
-
+window.addEventListener('DOMContentLoaded', () => {
     loadItems();
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+        saveItems();
+    });
+
+    document.getElementById('exit-btn').addEventListener('click', () => {
+        exitApp();
+    });
+
+    window.electron.receive('app-close', () => {
+        exitApp();
+    });
 });
+
+// 将 getTableItems 函数暴露在 window 对象上
+window.getTableItems = getTableItems;
