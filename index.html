@@ -1,95 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Electron List App</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron List App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        div {
+            text-align: center;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            margin: 5px;
+            width: calc(15% - 22px);
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <h1>List of Items</h1>
-  <button onclick="addItem()">Add Item</button>
-  <table>
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Author</th>
-        <th>Type</th>
-        <th>Year</th>
-        <th>Publication</th>
-        <th>Citation Key</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="item-list">
-      <!-- Items will be added here dynamically -->
-    </tbody>
-  </table>
-  <script>
-    const { ipcRenderer } = require('electron');
-    let items = [];
-
-    async function loadItems() {
-      items = await ipcRenderer.invoke('get-items');
-      renderItems();
-    }
-
-    function renderItems() {
-      const itemList = document.getElementById('item-list');
-      itemList.innerHTML = '';
-      items.forEach((item, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td contenteditable="true" oninput="updateItem(${index}, 'title', this.textContent)">${item.title}</td>
-          <td contenteditable="true" oninput="updateItem(${index}, 'author', this.textContent)">${item.author}</td>
-          <td contenteditable="true" oninput="updateItem(${index}, 'type', this.textContent)">${item.type}</td>
-          <td contenteditable="true" oninput="updateItem(${index}, 'year', this.textContent)">${item.year}</td>
-          <td contenteditable="true" oninput="updateItem(${index}, 'publication', this.textContent)">${item.publication}</td>
-          <td contenteditable="true" oninput="updateItem(${index}, 'citationkey', this.textContent)">${item.citationkey}</td>
-          <td><button onclick="deleteItem(${index})">Delete</button></td>
-        `;
-        itemList.appendChild(row);
-      });
-    }
-
-    function updateItem(index, field, value) {
-      items[index][field] = value;
-      saveItems();
-    }
-
-    function addItem() {
-      items.push({ title: '', author: '', type: '', year: '', publication: '', citationkey: '' });
-      renderItems();
-      saveItems();
-    }
-
-    function deleteItem(index) {
-      items.splice(index, 1);
-      renderItems();
-      saveItems();
-    }
-
-    async function saveItems() {
-      await ipcRenderer.invoke('save-items', items);
-    }
-
-    loadItems();
-  </script>
+    <h1>Item List</h1>
+    <table id="items-table">
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Type</th>
+            <th>Year</th>
+            <th>Publication</th>
+            <th>Citation Key</th>
+        </tr>
+    </table>
+    <div>
+        <input type="text" id="title-input" placeholder="Title">
+        <input type="text" id="author-input" placeholder="Author">
+        <input type="text" id="type-input" placeholder="Type">
+        <input type="text" id="year-input" placeholder="Year">
+        <input type="text" id="publication-input" placeholder="Publication">
+        <input type="text" id="citationkey-input" placeholder="Citation Key">
+        <button id="add-item-btn">Add Item</button>
+        <button id="save-btn">Save Items</button>
+        <button id="exit-btn">Exit</button>
+    </div>
+    <script src="renderer.js"></script>
 </body>
 </html>
-
