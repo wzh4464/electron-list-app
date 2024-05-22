@@ -108,3 +108,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // 将 getTableItems 函数暴露在 window 对象上
 window.getTableItems = getTableItems;
+
+// clearTable 函数用于清空表格
+function clearTable() {
+    const table = document.getElementById('items-table');
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+}
+
